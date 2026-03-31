@@ -79,7 +79,21 @@ function App() {
       // Replace loading message with error
       setMessages((prev) => {
         const withoutTyping = prev.filter(m => !m.isTyping);
-        const errorMessage = error.response?.data?.error || error.message || "An unexpected error occurred.";
+        let errorMessage = "An unexpected error occurred.";
+        
+        if (error.response) {
+          // Server responded with a status code outside the 2xx range
+          errorMessage = error.response.data?.error || `Server Error (${error.response.status})`;
+          if (error.response.status === 504) {
+            errorMessage = "Request timed out. Vercel's free plan has a 10-second limit. Please try a shorter question or re-upload your document.";
+          }
+        } else if (error.request) {
+          // Request was made but no response received
+          errorMessage = "No response from server. Check your connection.";
+        } else {
+          errorMessage = error.message;
+        }
+
         return [...withoutTyping, { 
           role: 'bot', 
           text: `Error: ${errorMessage}` 
