@@ -58,13 +58,16 @@ def generate_answer(query):
     global _vectorstore
     
     if _vectorstore is None:
-        return "The answer is not available in the provided documents. Please upload documents first.", []
+        return ("The document memory has been cleared due to inactivity. Please re-upload your PDF to ask more questions! (Note: This is a limitation of the free cloud hosting)", [])
         
     llm, embeddings = init_llm_and_embeddings()
     
-    # 1. Retrieve top 3-5 chunks (k=4)
-    retriever = _vectorstore.as_retriever(search_kwargs={"k": 4})
-    docs = retriever.invoke(query)
+    # 1. Retrieve top 3 chunks (k=3 for speed)
+    retriever = _vectorstore.as_retriever(search_kwargs={"k": 3})
+    try:
+        docs = retriever.invoke(query)
+    except Exception as e:
+        return (f"Error during retrieval: {str(e)}", [])
     
     # 2. Extract context text
     context_text = "\n\n---\n\n".join([f"Source: {doc.metadata.get('source', 'Unknown')}\nContent: {doc.page_content}" for doc in docs])

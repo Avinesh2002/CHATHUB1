@@ -79,9 +79,10 @@ function App() {
       // Replace loading message with error
       setMessages((prev) => {
         const withoutTyping = prev.filter(m => !m.isTyping);
+        const errorMessage = error.response?.data?.error || error.message || "An unexpected error occurred.";
         return [...withoutTyping, { 
           role: 'bot', 
-          text: `Error: ${error.response?.data?.error || error.message}` 
+          text: `Error: ${errorMessage}` 
         }];
       });
     }
