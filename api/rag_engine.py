@@ -28,6 +28,10 @@ def init_llm_and_embeddings():
 def process_and_index_documents(texts, metadatas=None):
     global _vectorstore
     
+    # Sanitize texts to handle lone surrogates and other UTF-8 encoding issues
+    # This prevents the 'utf-8' codec can't encode character... surrogates not allowed error
+    texts = [t.encode('utf-8', 'ignore').decode('utf-8') for t in texts]
+    
     # 1. Split Text into 500-1000 token chunks as requested.
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
