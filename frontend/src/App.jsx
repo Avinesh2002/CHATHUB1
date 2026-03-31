@@ -5,7 +5,7 @@ import ChatInterface from './components/ChatInterface';
 import LandingPage from './components/LandingPage';
 import './index.css';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 function App() {
   const [messages, setMessages] = useState([
