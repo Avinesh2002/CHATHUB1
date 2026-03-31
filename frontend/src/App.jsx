@@ -5,7 +5,7 @@ import ChatInterface from './components/ChatInterface';
 import LandingPage from './components/LandingPage';
 import './index.css';
 
-const API_BASE_URL = '';
+const API_BASE_URL = '/api';
 
 function App() {
   const [messages, setMessages] = useState([
