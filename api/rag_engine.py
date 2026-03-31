@@ -56,23 +56,30 @@ def process_and_index_documents(texts, metadatas=None):
 
 def generate_answer(query):
     global _vectorstore
+    print(f"--- Chat Request Received: {query[:50]}... ---")
     
     if _vectorstore is None:
-        return ("The document memory has been cleared due to inactivity. Please re-upload your PDF to ask more questions! (Note: This is a limitation of the free cloud hosting)", [])
+        print("--- Error: Vectorstore is None (Stateless Reset) ---")
+        return ("The document memory has been cleared due to inactivity. Please re-upload your document! (This is a limitation of the free cloud hosting)", [])
         
+    print("--- Initializing LLM and Embeddings ---")
     llm, embeddings = init_llm_and_embeddings()
     
-    # 1. Retrieve top 3 chunks (k=3 for speed)
-    retriever = _vectorstore.as_retriever(search_kwargs={"k": 3})
+    # 1. Retrieve top 2 chunks (k=2 for maximum speed)
+    print("--- Retrieving Chunks ---")
+    retriever = _vectorstore.as_retriever(search_kwargs={"k": 2})
     try:
         docs = retriever.invoke(query)
+        print(f"--- Found {len(docs)} relevant chunks ---")
     except Exception as e:
+        print(f"--- Retrieval Error: {str(e)} ---")
         return (f"Error during retrieval: {str(e)}", [])
     
     # 2. Extract context text
     context_text = "\n\n---\n\n".join([f"Source: {doc.metadata.get('source', 'Unknown')}\nContent: {doc.page_content}" for doc in docs])
     
     # 3. Prompt Template
+    print("--- Generating Answer with Gemini ---")
     template = """
     You are a document-based assistant. Answer ONLY using the provided context. 
     If the answer is not present, say 'The answer is not available in the provided documents.'
